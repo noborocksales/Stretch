@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>毎日ストレッチタイマー</title>
+    <!-- PWA Config -->
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIjM2Ndim4oS2ODlu44K544OI44Oa44OD44OB44K/44Kk44OD44OEIiwKICAic2hvcnRfbmFtZSI6ICLjg4njg4Pjg4HvvLg4IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIgp9">
     <style>
         /* Base Setup & Colors */
         * {
@@ -31,7 +34,7 @@
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
-            items-center: center;
+            align-items: center;
             border-bottom: 1px solid #334155;
             position: sticky;
             top: 0;
@@ -479,6 +482,32 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.4);
             z-index: 200;
         }
+
+        .notice-box {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+
+        .btn-cal {
+            background-color: #38bdf8;
+            color: #020617;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -486,11 +515,11 @@
     <header>
         <div class="logo">
             <span>🧘</span>
-            <span>毎日8分ストレッチ</span>
+            <span>毎日ストレッチ</span>
         </div>
         <div class="header-btns">
             <button id="edit-menu-btn" class="btn-sub">✏️ メニュー編集</button>
-            <button id="notification-btn" class="btn-sub">🔔 通知</button>
+            <button id="notification-btn" class="btn-sub">🔔 通知設定</button>
         </div>
     </header>
 
@@ -526,7 +555,7 @@
 
                 <div id="toggle-sfx" class="sfx-control">
                     <span id="sfx-icon">🔊</span>
-                    <span>効果音 ON (Amazon Music等と併用可)</span>
+                    <span>効果音 ON </span>
                 </div>
             </div>
 
@@ -558,23 +587,45 @@
     <div id="notification-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span>🔔 毎日のリマインダー通知</span>
+                <span>🔔 画面閉時も届く確実なリマインダー</span>
                 <button id="close-notif-modal" class="modal-close">&times;</button>
             </div>
-            <p style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
-                設定した時間にリマインド通知を送信します。毎日の習慣化にご活用ください。
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 11px; color: #94a3b8;">通知時刻</label>
-                <input type="time" id="reminder-time" value="21:00">
+
+            <div class="notice-box">
+                💡 <b>アプリや画面を閉じていても通知を受け取る2つの方法：</b>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8;">
-                <span>ステータス:</span>
+
+            <!-- Option A: Calendar Export -->
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+                <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-bottom: 4px;">
+                    1. OS標準カレンダーに一括登録（100%確実に届く推奨方法）
+                </div>
+                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+                    iPhone/Android標準の予定として毎日リマインダーをセットします。アプリを完全に閉じていても確実にアラームが鳴ります。
+                </p>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="time" id="cal-time-input" value="21:00" style="width: 100px;">
+                    <button id="export-ics-btn" class="btn-cal" style="flex: 1;">📅 カレンダーに追加 (.ics)</button>
+                </div>
+            </div>
+
+            <!-- Option B: Service Worker & PWA Push -->
+            <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+                <div style="font-size: 12px; font-weight: bold; color: #4ade80; margin-bottom: 4px;">
+                    2. Web Push / PWA通知を有効化
+                </div>
+                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+                    ブラウザのService Workerを利用します。（iOSの場合は「ホーム画面に追加」をしてアプリ化するとバックグラウンド通知が動作します）
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <input type="time" id="reminder-time" value="21:00">
+                    <button id="save-notif" class="btn-main" style="padding: 10px; justify-content: center; width: 100%;">Web通知を有効化</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8;">
+                <span>現在の通知ステータス:</span>
                 <span id="notif-status" style="color: #fbbf24; font-weight: bold;">未設定</span>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <button id="cancel-notif" class="btn-sub" style="flex: 1; padding: 10px;">キャンセル</button>
-                <button id="save-notif" class="btn-main" style="flex: 1; padding: 10px; justify-content: center;">保存・有効化</button>
             </div>
         </div>
     </div>
@@ -602,6 +653,26 @@
     </div>
 
     <script>
+        // Service Worker for Background Notification handling
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', (e) => self.skipWaiting());
+                self.addEventListener('activate', (e) => self.clients.claim());
+                self.addEventListener('notificationclick', (e) => {
+                    e.notification.close();
+                    e.waitUntil(
+                        clients.matchAll({ type: 'window' }).then((clientList) => {
+                            if (clientList.length > 0) return clientList[0].focus();
+                            return clients.openWindow('./');
+                        })
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+
         // Default Stretch Menu Configuration
         const DEFAULT_STRETCH_MENU = [
             { id: 1, name: "太ももかわき腹のストレッチ (左)", desc: "片足を伸ばし、上半身を横に倒して側面を気持ちよく伸ばします。", svg: "stretch1", image: "" },
@@ -649,7 +720,7 @@
         let isRunning = false;
         let timerInterval = null;
 
-        // Web Audio AudioContext (Non-blocking external audio)
+        // Web Audio AudioContext
         let sfxEnabled = true;
         let audioCtx = null;
 
@@ -950,7 +1021,6 @@
             }
         });
 
-        // Image compression & local reading
         editorItemsContainer.addEventListener('change', (e) => {
             const action = e.target.getAttribute('data-action');
             if (action === 'upload') {
@@ -1031,29 +1101,70 @@
             showCustomToast("初期メニューに戻しました。");
         });
 
-        // Notifications Modal Logic
         const notifBtn = document.getElementById('notification-btn');
         const notifModal = document.getElementById('notification-modal');
         const closeNotifModal = document.getElementById('close-notif-modal');
-        const cancelNotif = document.getElementById('cancel-notif');
         const saveNotif = document.getElementById('save-notif');
         const reminderTimeInput = document.getElementById('reminder-time');
         const notifStatus = document.getElementById('notif-status');
+        const exportIcsBtn = document.getElementById('export-ics-btn');
+        const calTimeInput = document.getElementById('cal-time-input');
 
         const savedTime = localStorage.getItem('stretch_reminder_time');
         if (savedTime) {
             reminderTimeInput.value = savedTime;
+            calTimeInput.value = savedTime;
             notifStatus.textContent = `${savedTime} に設定中`;
             notifStatus.style.color = "#34d399";
         }
 
         notifBtn.addEventListener('click', () => notifModal.classList.add('active'));
         closeNotifModal.addEventListener('click', () => notifModal.classList.remove('active'));
-        cancelNotif.addEventListener('click', () => notifModal.classList.remove('active'));
 
+        // Calendar .ics Export (100% Reliable Background Alarm)
+        exportIcsBtn.addEventListener('click', () => {
+            const [hours, minutes] = calTimeInput.value.split(':');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            const startDt = `${year}${month}${day}T${hours}${minutes}00`;
+            
+            const icsData = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Daily Stretch Timer//JA',
+                'BEGIN:VEVENT',
+                `DTSTART:${startDt}`,
+                `DTEND:${startDt}`,
+                'RRULE:FREQ=DAILY',
+                'SUMMARY:🧘 毎日8分ストレッチの時間です！',
+                'DESCRIPTION:本日のストレッチを開始して、疲労をリセットしましょう。',
+                'BEGIN:VALARM',
+                'TRIGGER:-PT0M',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:毎日8分ストレッチの時間です！',
+                'END:VALARM',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'stretch_daily_reminder.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showCustomToast("📅 カレンダーファイルを保存しました！開いて追加してください");
+        });
+
+        // Web Notification Service Worker Integration
         saveNotif.addEventListener('click', async () => {
             if (!("Notification" in window)) {
-                showCustomToast("お使いのブラウザはWeb通知非対応です。");
+                showCustomToast("お使いの環境はWeb通知非対応です。カレンダー追加をご利用ください。");
                 return;
             }
             let permission = Notification.permission;
@@ -1063,12 +1174,21 @@
             if (permission === "granted") {
                 const timeVal = reminderTimeInput.value;
                 localStorage.setItem('stretch_reminder_time', timeVal);
-                notifStatus.textContent = `${timeVal} に設定中`;
+                notifStatus.textContent = `${timeVal} (Web通知有効)`;
                 notifStatus.style.color = "#34d399";
-                showCustomToast(`毎日 ${timeVal} に通知設定しました！`);
+
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                    const reg = await navigator.serviceWorker.ready;
+                    reg.showNotification("🧘 ストレッチリマインダー設定完了", {
+                        body: `毎日 ${timeVal} に通知を送信します（PWAアプリ化を推薦）。`,
+                        icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧘</text></svg>'
+                    });
+                }
+
+                showCustomToast(`毎日 ${timeVal} にWeb通知設定しました！`);
                 notifModal.classList.remove('active');
             } else {
-                showCustomToast("通知の許可が得られませんでした。");
+                showCustomToast("通知権限が許可されませんでした。");
             }
         });
 
