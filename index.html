@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毎日ストレッチタイマー</title>
+    <style>
+        /* Base Setup & Colors */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Header */
+        header {
+            background-color: rgba(30, 41, 59, 0.95);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            items-center: center;
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #4ade80;
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sub {
+            background-color: #334155;
+            color: #f8fafc;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-sub:active {
+            background-color: #475569;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .card {
+            width: 100%;
+            background-color: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Image Display Area */
+        .image-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #020617;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .stretch-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .stretch-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .badge {
+            position: absolute;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-status {
+            top: 12px;
+            right: 12px;
+            background-color: #34d399;
+            color: #020617;
+        }
+
+        .badge-status.rest {
+            background-color: #fbbf24;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .badge-step {
+            top: 12px;
+            left: 12px;
+            background-color: rgba(15, 23, 42, 0.85);
+            color: #f8fafc;
+            border: 1px solid #334155;
+        }
+
+        /* Stretch Info Section */
+        .info-section {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stretch-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #4ade80;
+            margin-bottom: 6px;
+        }
+
+        .stretch-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* Timer Section */
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .timer-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-circle-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-circle-bg {
+            stroke: #334155;
+            stroke-width: 8;
+            fill: transparent;
+        }
+
+        .timer-circle-progress {
+            stroke: #34d399;
+            stroke-width: 8;
+            fill: transparent;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+        }
+
+        .timer-text-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-seconds {
+            font-size: 44px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .timer-unit {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        /* Sound Control */
+        .sfx-control {
+            margin-top: 10px;
+            background-color: rgba(15, 23, 42, 0.6);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+            font-size: 11px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        /* Control Panel */
+        .controls {
+            padding: 16px;
+            background-color: #1a2332;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background-color: #334155;
+            border: none;
+            color: #f8fafc;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-circle:active {
+            transform: scale(0.95);
+        }
+
+        .btn-main {
+            padding: 12px 32px;
+            border-radius: 16px;
+            background-color: #34d399;
+            color: #020617;
+            font-size: 16px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(52, 211, 153, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-main:active {
+            transform: scale(0.95);
+            background-color: #22c55e;
+        }
+
+        /* Footer */
+        footer {
+            padding: 16px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            background-color: #1e293b;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .progress-bar-fill {
+            background-color: #34d399;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .footer-info {
+            text-align: center;
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .editor-list {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+
+        .editor-item {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .editor-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .editor-item-num {
+            font-size: 12px;
+            font-weight: bold;
+            color: #4ade80;
+            width: 24px;
+        }
+
+        input[type="text"], input[type="time"] {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus, input[type="time"]:focus {
+            outline: none;
+            border-color: #34d399;
+        }
+
+        .btn-file-upload {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #4ade80;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #334155;
+            padding-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #34d399;
+            color: #020617;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span>🧘</span>
+            <span>毎日8分ストレッチ</span>
+        </div>
+        <div class="header-btns">
+            <button id="edit-menu-btn" class="btn-sub">✏️ メニュー編集</button>
+            <button id="notification-btn" class="btn-sub">🔔 通知</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <!-- Stretch Card Image Header -->
+            <div class="image-container">
+                <img id="stretch-custom-img" class="stretch-img" style="display: none;" alt="Stretch" />
+                <svg id="stretch-svg" class="stretch-svg" viewBox="0 0 800 450"></svg>
+
+                <div id="status-badge" class="badge badge-status">READY</div>
+                <div id="step-counter" class="badge badge-step">1 / 16</div>
+            </div>
+
+            <!-- Title & Info -->
+            <div class="info-section">
+                <div id="stretch-title" class="stretch-title">1. 太ももかわき腹のストレッチ (左)</div>
+                <div id="stretch-desc" class="stretch-desc">足を伸ばし、側面をしっかり伸ばしていきます。</div>
+            </div>
+
+            <!-- Circular Timer Display -->
+            <div class="timer-section">
+                <div class="timer-wrapper">
+                    <svg class="timer-circle-svg">
+                        <circle cx="75" cy="75" r="65" class="timer-circle-bg"></circle>
+                        <circle id="timer-progress" cx="75" cy="75" r="65" class="timer-circle-progress" stroke-dasharray="408.4" stroke-dashoffset="0"></circle>
+                    </svg>
+                    <div class="timer-text-container">
+                        <span id="timer-seconds" class="timer-seconds">30</span>
+                        <span class="timer-unit">秒</span>
+                    </div>
+                </div>
+
+                <div id="toggle-sfx" class="sfx-control">
+                    <span id="sfx-icon">🔊</span>
+                    <span>効果音 ON (Amazon Music等と併用可)</span>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="controls">
+                <button id="prev-btn" class="btn-circle">⏮</button>
+                <button id="start-btn" class="btn-main">
+                    <span id="start-icon">▶</span>
+                    <span id="start-text">スタート</span>
+                </button>
+                <button id="next-btn" class="btn-circle">⏭</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="progress-header">
+            <span>全体の進行状況</span>
+            <span id="total-progress-percent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="total-progress-bar" class="progress-bar-fill"></div>
+        </div>
+        <div class="footer-info">
+            全 <span id="footer-menu-count">16</span> ステップ • 各30秒 + レスト5秒
+        </div>
+    </footer>
+
+    <div id="notification-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>🔔 毎日のリマインダー通知</span>
+                <button id="close-notif-modal" class="modal-close">&times;</button>
+            </div>
+            <p style="font-size: 12px; color: #94a3b8; line-height: 1.4;">
+                設定した時間にリマインド通知を送信します。毎日の習慣化にご活用ください。
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 11px; color: #94a3b8;">通知時刻</label>
+                <input type="time" id="reminder-time" value="21:00">
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8;">
+                <span>ステータス:</span>
+                <span id="notif-status" style="color: #fbbf24; font-weight: bold;">未設定</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button id="cancel-notif" class="btn-sub" style="flex: 1; padding: 10px;">キャンセル</button>
+                <button id="save-notif" class="btn-main" style="flex: 1; padding: 10px; justify-content: center;">保存・有効化</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="menu-editor-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>✏️ ストレッチメニュー編集</span>
+                <button id="close-menu-editor" class="modal-close">&times;</button>
+            </div>
+            <p style="font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                メニュー名・説明・画像を設定できます。画像ファイルを直接選択（高画質JPGも自動軽量化）またはURLの指定が可能です。
+            </p>
+
+            <div id="editor-items-container" class="editor-list"></div>
+
+            <div class="modal-footer">
+                <button id="reset-menu-btn" class="btn-sub">初期化</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="add-menu-item-btn" class="btn-sub" style="color: #4ade80;">+ 追加</button>
+                    <button id="save-menu-btn" class="btn-main" style="padding: 6px 16px; font-size: 13px;">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Stretch Menu Configuration
+        const DEFAULT_STRETCH_MENU = [
+            { id: 1, name: "太ももかわき腹のストレッチ (左)", desc: "片足を伸ばし、上半身を横に倒して側面を気持ちよく伸ばします。", svg: "stretch1", image: "" },
+            { id: 2, name: "太ももかわき腹のストレッチ (右)", desc: "反対側も同様に、体の側面と太もも裏をしっかり伸ばします。", svg: "stretch1_r", image: "" },
+            { id: 3, name: "おしりのストレッチ (左)", desc: "前足を曲げて股関節を落とし、おしりの筋肉をほぐします。", svg: "stretch2", image: "" },
+            { id: 4, name: "おしりのストレッチ (右)", desc: "反対側のおしりの筋肉をじっくりと伸ばしていきます。", svg: "stretch2_r", image: "" },
+            { id: 5, name: "腸腰筋のストレッチ (左)", desc: "片膝をついて重心を前に移し、股関節の前側を伸ばします。", svg: "stretch3", image: "" },
+            { id: 6, name: "腸腰筋のストレッチ (右)", desc: "反対側の股関節前側（腸腰筋）をしっかりストレッチします。", svg: "stretch3_r", image: "" },
+            { id: 7, name: "背中のストレッチ (左)", desc: "四つんバッチから片腕を斜め前に伸ばし、背筋を伸ばします。", svg: "stretch4", image: "" },
+            { id: 8, name: "背中のストレッチ (右)", desc: "反対側の腕を伸ばし、脇の下から背中にかけてストレッチします。", svg: "stretch4_r", image: "" },
+            { id: 9, name: "太もも前のストレッチ (左)", desc: "うつ伏せになり、足首を手で抱えて太もも前を伸ばします。", svg: "stretch5", image: "" },
+            { id: 10, name: "太もも前のストレッチ (右)", desc: "反対側の太もも前の筋肉を心地よくストレッチします。", svg: "stretch5_r", image: "" },
+            { id: 11, name: "太もも後ろのストレッチ (左)", desc: "片足を前に伸ばして長座し、前屈して太もも裏を伸ばします。", svg: "stretch6", image: "" },
+            { id: 12, name: "太もも後ろのストレッチ (右)", desc: "反対側の太もも裏（ハムストリングス）を伸ばします。", svg: "stretch6_r", image: "" },
+            { id: 13, name: "股関節のストレッチ", desc: "足の裏を合わせてあぐらをかき、膝を床に近づけます。", svg: "stretch7", image: "" },
+            { id: 14, name: "首と肩のストレッチ (左)", desc: "頭を横に優しく倒し、首から肩にかけてのラインを伸ばします。", svg: "stretch8", image: "" },
+            { id: 15, name: "首と肩のストレッチ (右)", desc: "反対側も同様に頭を倒し、首筋を心地よくストレッチします。", svg: "stretch8_r", image: "" },
+            { id: 16, name: "ブラブラ", desc: "仰向けになって手足を上げ、力を抜いて全身をバタバタ揺らします。", svg: "stretch9", image: "" }
+        ];
+
+        let stretchMenu = [];
+
+        function loadMenuData() {
+            const saved = localStorage.getItem('stretch_custom_menu_pure_v1');
+            if (saved) {
+                try {
+                    stretchMenu = JSON.parse(saved);
+                } catch(e) {
+                    stretchMenu = JSON.parse(JSON.stringify(DEFAULT_STRETCH_MENU));
+                }
+            } else {
+                stretchMenu = JSON.parse(JSON.stringify(DEFAULT_STRETCH_MENU));
+            }
+        }
+
+        loadMenuData();
+
+        const WORK_TIME = 30;
+        const REST_TIME = 5;
+        const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 65; // 408.4
+
+        let currentIndex = 0;
+        let isResting = false;
+        let timeLeft = WORK_TIME;
+        let isRunning = false;
+        let timerInterval = null;
+
+        // Web Audio AudioContext (Non-blocking external audio)
+        let sfxEnabled = true;
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playGentleTick() {
+            if (!sfxEnabled) return;
+            initAudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playChime(freq = 528, duration = 1.2) { 
+            if (!sfxEnabled) return;
+            initAudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // DOM Elements
+        const stretchTitle = document.getElementById('stretch-title');
+        const stretchDesc = document.getElementById('stretch-desc');
+        const statusBadge = document.getElementById('status-badge');
+        const stepCounter = document.getElementById('step-counter');
+        const timerSeconds = document.getElementById('timer-seconds');
+        const timerProgress = document.getElementById('timer-progress');
+        const startBtn = document.getElementById('start-btn');
+        const startIcon = document.getElementById('start-icon');
+        const startText = document.getElementById('start-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const totalProgressBar = document.getElementById('total-progress-bar');
+        const totalProgressPercent = document.getElementById('total-progress-percent');
+        const svgContainer = document.getElementById('stretch-svg');
+        const customImgEl = document.getElementById('stretch-custom-img');
+        const footerMenuCount = document.getElementById('footer-menu-count');
+
+        function renderStretchGraphic(type) {
+            let innerContent = `
+                <rect width="800" height="450" fill="#1e293b"/>
+                <rect y="330" width="800" height="120" fill="#0f172a"/>
+                <line x1="0" y1="330" x2="800" y2="330" stroke="#334155" stroke-width="3"/>
+                <rect x="180" y="320" width="440" height="20" rx="10" fill="#4ade80"/>
+                
+                <rect x="0" y="20" width="280" height="85" fill="#a3e635"/>
+                <text x="15" y="45" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3f6212">全身ストレッチ</text>
+                <text x="15" y="65" font-family="sans-serif" font-size="14" font-weight="bold" fill="#3f6212">1日終わりにこれ1本</text>
+                <text x="15" y="92" font-family="sans-serif" font-size="18" font-weight="extrabold" fill="#15803d">${stretchMenu[currentIndex] ? stretchMenu[currentIndex].name.split(' (')[0] : ''}</text>
+            `;
+
+            let poseMarkup = '';
+            const isFlipped = type ? type.endsWith('_r') : false;
+            const poseType = type ? type.replace('_r', '') : 'stretch1';
+
+            if (poseType === 'stretch1') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 500 : 300}, 280) scale(${isFlipped ? -1 : 1}, 1)"><path d="M-80,40 L0,40 L60,10" stroke="#020617" stroke-width="24" stroke-linecap="round"/><path d="M0,40 L-20,-30 L-70,-60" stroke="#020617" stroke-width="28" stroke-linecap="round"/><circle cx="-15" cy="-55" r="18" fill="#fca5a5"/><path d="M-20,-20 L-80,20" stroke="#020617" stroke-width="16" stroke-linecap="round"/><path d="M-20,-40 C-30,-80 -70,-80 -100,-40" stroke="#020617" stroke-width="16" fill="none" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch2') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 500 : 300}, 290) scale(${isFlipped ? -1 : 1}, 1)"><path d="M120,30 L20,30 L-40,10 L-70,30" stroke="#020617" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M-30,10 L-60,-20 L-90,10" stroke="#020617" stroke-width="26" stroke-linecap="round" fill="none"/><circle cx="-85" cy="-35" r="18" fill="#fca5a5"/></g>`;
+            } else if (poseType === 'stretch3') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 480 : 320}, 250) scale(${isFlipped ? -1 : 1}, 1)"><path d="M100,70 L20,70 L-20,10 L-70,10 L-70,70" stroke="#020617" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M-20,10 L-20,-50" stroke="#020617" stroke-width="28" stroke-linecap="round"/><circle cx="-20" cy="-75" r="18" fill="#fca5a5"/><path d="M-20,-40 L-60,0" stroke="#020617" stroke-width="16" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch4') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 480 : 320}, 280) scale(${isFlipped ? -1 : 1}, 1)"><path d="M80,40 L30,40 L10,-10 L-60,0" stroke="#020617" stroke-width="26" stroke-linecap="round" fill="none"/><circle cx="-75" cy="-10" r="18" fill="#fca5a5"/><path d="M-50,0 L-110,35" stroke="#020617" stroke-width="16" stroke-linecap="round"/><path d="M-50,0 L-30,35" stroke="#020617" stroke-width="16" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch5') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 500 : 300}, 300) scale(${isFlipped ? -1 : 1}, 1)"><path d="M120,20 L20,20 L-40,0 L-80,10" stroke="#020617" stroke-width="24" stroke-linecap="round" fill="none"/><path d="M20,20 L50,-20 L10,0" stroke="#020617" stroke-width="22" stroke-linecap="round" fill="none"/><circle cx="-95" cy="-5" r="18" fill="#fca5a5"/><path d="M-60,0 L10,-5" stroke="#020617" stroke-width="14" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch6') {
+                poseMarkup = `<g transform="translate(${isFlipped ? 480 : 320}, 280) scale(${isFlipped ? -1 : 1}, 1)"><path d="M-80,40 L0,40 L10,10" stroke="#020617" stroke-width="24" stroke-linecap="round"/><path d="M0,40 L-40,-10 L-90,15" stroke="#020617" stroke-width="28" stroke-linecap="round"/><circle cx="-50" cy="-25" r="18" fill="#fca5a5"/><path d="M-40,-10 L-100,30" stroke="#020617" stroke-width="16" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch7') {
+                poseMarkup = `<g transform="translate(400, 270)"><path d="M-50,50 L0,20 L50,50 L0,50 Z" stroke="#020617" stroke-width="24" stroke-linejoin="round" fill="none"/><path d="M0,20 L0,-40" stroke="#020617" stroke-width="28" stroke-linecap="round"/><circle cx="0" cy="-65" r="18" fill="#fca5a5"/><path d="M0,-30 L-10,30 M0,-30 L10,30" stroke="#020617" stroke-width="16" stroke-linecap="round"/></g>`;
+            } else if (poseType === 'stretch8') {
+                poseMarkup = `<g transform="translate(400, 260)"><path d="M-40,60 L0,60 L40,60" stroke="#020617" stroke-width="24" stroke-linecap="round"/><path d="M0,60 L0,0" stroke="#020617" stroke-width="28" stroke-linecap="round"/><circle cx="${isFlipped ? 15 : -15}" cy="-20" r="18" fill="#fca5a5"/><path d="M0,-10 C${isFlipped ? '30,-40 20,-10 15,-20' : '-30,-40 -20,-10 -15,-20'}" stroke="#020617" stroke-width="14" fill="none"/><path d="M0,0 L${isFlipped ? -50 : 50},40" stroke="#020617" stroke-width="14" stroke-linecap="round"/></g>`;
+            } else {
+                poseMarkup = `<g transform="translate(400, 300)"><path d="M-80,20 L0,20 L80,20" stroke="#020617" stroke-width="24" stroke-linecap="round"/><circle cx="-100" cy="15" r="18" fill="#fca5a5"/><path d="M30,20 L20,-60 M50,20 L60,-55" stroke="#020617" stroke-width="20" stroke-linecap="round"/><path d="M-40,20 L-50,-50 M-20,20 L-10,-55" stroke="#020617" stroke-width="16" stroke-linecap="round"/></g>`;
+            }
+
+            svgContainer.innerHTML = innerContent + poseMarkup;
+        }
+
+        function updateUI() {
+            if (stretchMenu.length === 0) return;
+            if (currentIndex >= stretchMenu.length) currentIndex = 0;
+
+            const current = stretchMenu[currentIndex];
+            
+            stretchTitle.textContent = `${currentIndex + 1}. ${current.name}`;
+            stretchDesc.textContent = current.desc;
+            stepCounter.textContent = `${currentIndex + 1} / ${stretchMenu.length}`;
+            footerMenuCount.textContent = stretchMenu.length;
+
+            if (isResting) {
+                statusBadge.textContent = "REST (休憩)";
+                statusBadge.className = "badge badge-status rest";
+            } else {
+                statusBadge.textContent = isRunning ? "STRETCHING" : "READY";
+                statusBadge.className = "badge badge-status";
+            }
+
+            timerSeconds.textContent = timeLeft;
+            const maxTime = isResting ? REST_TIME : WORK_TIME;
+            const offset = CIRCLE_CIRCUMFERENCE - (timeLeft / maxTime) * CIRCLE_CIRCUMFERENCE;
+            timerProgress.style.strokeDashoffset = offset;
+            timerProgress.style.stroke = isResting ? '#fbbf24' : '#34d399';
+
+            const totalSecPassed = currentIndex * (WORK_TIME + REST_TIME) + (isResting ? WORK_TIME : (WORK_TIME - timeLeft));
+            const totalSecOverall = stretchMenu.length * (WORK_TIME + REST_TIME);
+            const percent = totalSecOverall > 0 ? Math.min(100, Math.round((totalSecPassed / totalSecOverall) * 100)) : 0;
+            totalProgressBar.style.width = `${percent}%`;
+            totalProgressPercent.textContent = `${percent}%`;
+
+            if (current.image && current.image.trim() !== "") {
+                customImgEl.src = current.image;
+                customImgEl.style.display = 'block';
+                svgContainer.style.display = 'none';
+            } else {
+                customImgEl.style.display = 'none';
+                svgContainer.style.display = 'block';
+                renderStretchGraphic(current.svg);
+            }
+        }
+
+        function tick() {
+            if (timeLeft > 1) {
+                timeLeft--;
+                if (timeLeft <= 3) {
+                    playChime(660, 0.4);
+                } else if (!isResting) {
+                    playGentleTick();
+                }
+            } else {
+                if (!isResting) {
+                    playChime(880, 1.5);
+                    if (currentIndex < stretchMenu.length - 1) {
+                        isResting = true;
+                        timeLeft = REST_TIME;
+                    } else {
+                        finishWorkout();
+                        return;
+                    }
+                } else {
+                    playChime(528, 1.2);
+                    isResting = false;
+                    currentIndex++;
+                    timeLeft = WORK_TIME;
+                }
+            }
+            updateUI();
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            initAudioContext();
+            isRunning = true;
+            startIcon.textContent = "⏸";
+            startText.textContent = "一時停止";
+            timerInterval = setInterval(tick, 1000);
+            updateUI();
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            startIcon.textContent = "▶";
+            startText.textContent = "再開";
+            clearInterval(timerInterval);
+            updateUI();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function finishWorkout() {
+            pauseTimer();
+            currentIndex = 0;
+            isResting = false;
+            timeLeft = WORK_TIME;
+            updateUI();
+            showCustomToast("🎉 お疲れ様でした！本日のストレッチ完了です！");
+        }
+
+        function showCustomToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // Control Listeners
+        startBtn.addEventListener('click', toggleTimer);
+
+        prevBtn.addEventListener('click', () => {
+            pauseTimer();
+            if (currentIndex > 0) currentIndex--;
+            isResting = false;
+            timeLeft = WORK_TIME;
+            updateUI();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            pauseTimer();
+            if (currentIndex < stretchMenu.length - 1) currentIndex++;
+            isResting = false;
+            timeLeft = WORK_TIME;
+            updateUI();
+        });
+
+        document.getElementById('toggle-sfx').addEventListener('click', () => {
+            sfxEnabled = !sfxEnabled;
+            document.getElementById('sfx-icon').textContent = sfxEnabled ? "🔊" : "🔇";
+        });
+
+        const editMenuBtn = document.getElementById('edit-menu-btn');
+        const menuEditorModal = document.getElementById('menu-editor-modal');
+        const closeMenuEditor = document.getElementById('close-menu-editor');
+        const editorItemsContainer = document.getElementById('editor-items-container');
+        const saveMenuBtn = document.getElementById('save-menu-btn');
+        const resetMenuBtn = document.getElementById('reset-menu-btn');
+        const addMenuItemBtn = document.getElementById('add-menu-item-btn');
+
+        function renderEditorList() {
+            editorItemsContainer.innerHTML = '';
+            stretchMenu.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'editor-item';
+                itemEl.innerHTML = `
+                    <div class="editor-row">
+                        <span class="editor-item-num">#${index + 1}</span>
+                        <input type="text" value="${item.name.replace(/"/g, '&quot;')}" data-field="name" data-index="${index}" placeholder="メニュー名" />
+                        <button data-action="delete" data-index="${index}" class="btn-delete">🗑</button>
+                    </div>
+                    <input type="text" value="${item.desc.replace(/"/g, '&quot;')}" data-field="desc" data-index="${index}" placeholder="説明文" />
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <label class="btn-file-upload">
+                            📁 画像を選択 (JPG/PNG)
+                            <input type="file" accept="image/*" data-action="upload" data-index="${index}" style="display: none;" />
+                        </label>
+                        <span style="font-size: 10px; color: #64748b;">または</span>
+                    </div>
+                    <input type="text" value="${(item.image || '').replace(/"/g, '&quot;')}" data-field="image" data-index="${index}" placeholder="画像URL" />
+                `;
+                editorItemsContainer.appendChild(itemEl);
+            });
+        }
+
+        editMenuBtn.addEventListener('click', () => {
+            renderEditorList();
+            menuEditorModal.classList.add('active');
+        });
+
+        closeMenuEditor.addEventListener('click', () => {
+            menuEditorModal.classList.remove('active');
+        });
+
+        addMenuItemBtn.addEventListener('click', () => {
+            const newId = stretchMenu.length > 0 ? Math.max(...stretchMenu.map(m => m.id)) + 1 : 1;
+            stretchMenu.push({
+                id: newId,
+                name: `新しいストレッチ ${newId}`,
+                desc: "ストレッチの説明を入力してください。",
+                svg: "stretch1",
+                image: ""
+            });
+            renderEditorList();
+        });
+
+        editorItemsContainer.addEventListener('input', (e) => {
+            const field = e.target.getAttribute('data-field');
+            const idx = e.target.getAttribute('data-index');
+            if (field && idx !== null) {
+                stretchMenu[idx][field] = e.target.value;
+            }
+        });
+
+        // Image compression & local reading
+        editorItemsContainer.addEventListener('change', (e) => {
+            const action = e.target.getAttribute('data-action');
+            if (action === 'upload') {
+                const idx = e.target.getAttribute('data-index');
+                const file = e.target.files[0];
+                if (file) {
+                    showCustomToast("画像を自動圧縮・最適化中...");
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const MAX_WIDTH = 800;
+                            const MAX_HEIGHT = 800;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                            stretchMenu[idx].image = compressedDataUrl;
+                            renderEditorList();
+                            showCustomToast("画像を最適化して設定しました！");
+                        };
+                        img.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        editorItemsContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action="delete"]');
+            if (btn) {
+                const idx = parseInt(btn.getAttribute('data-index'));
+                if (stretchMenu.length <= 1) {
+                    showCustomToast("最低1つのメニューが必要です。");
+                    return;
+                }
+                stretchMenu.splice(idx, 1);
+                renderEditorList();
+            }
+        });
+
+        saveMenuBtn.addEventListener('click', () => {
+            try {
+                localStorage.setItem('stretch_custom_menu_pure_v1', JSON.stringify(stretchMenu));
+                menuEditorModal.classList.remove('active');
+                currentIndex = 0;
+                isResting = false;
+                timeLeft = WORK_TIME;
+                updateUI();
+                showCustomToast("メニューと画像を保存しました！");
+            } catch(e) {
+                showCustomToast("保存サイズの上限を超えました。");
+            }
+        });
+
+        resetMenuBtn.addEventListener('click', () => {
+            stretchMenu = JSON.parse(JSON.stringify(DEFAULT_STRETCH_MENU));
+            localStorage.removeItem('stretch_custom_menu_pure_v1');
+            renderEditorList();
+            showCustomToast("初期メニューに戻しました。");
+        });
+
+        // Notifications Modal Logic
+        const notifBtn = document.getElementById('notification-btn');
+        const notifModal = document.getElementById('notification-modal');
+        const closeNotifModal = document.getElementById('close-notif-modal');
+        const cancelNotif = document.getElementById('cancel-notif');
+        const saveNotif = document.getElementById('save-notif');
+        const reminderTimeInput = document.getElementById('reminder-time');
+        const notifStatus = document.getElementById('notif-status');
+
+        const savedTime = localStorage.getItem('stretch_reminder_time');
+        if (savedTime) {
+            reminderTimeInput.value = savedTime;
+            notifStatus.textContent = `${savedTime} に設定中`;
+            notifStatus.style.color = "#34d399";
+        }
+
+        notifBtn.addEventListener('click', () => notifModal.classList.add('active'));
+        closeNotifModal.addEventListener('click', () => notifModal.classList.remove('active'));
+        cancelNotif.addEventListener('click', () => notifModal.classList.remove('active'));
+
+        saveNotif.addEventListener('click', async () => {
+            if (!("Notification" in window)) {
+                showCustomToast("お使いのブラウザはWeb通知非対応です。");
+                return;
+            }
+            let permission = Notification.permission;
+            if (permission !== "granted") {
+                permission = await Notification.requestPermission();
+            }
+            if (permission === "granted") {
+                const timeVal = reminderTimeInput.value;
+                localStorage.setItem('stretch_reminder_time', timeVal);
+                notifStatus.textContent = `${timeVal} に設定中`;
+                notifStatus.style.color = "#34d399";
+                showCustomToast(`毎日 ${timeVal} に通知設定しました！`);
+                notifModal.classList.remove('active');
+            } else {
+                showCustomToast("通知の許可が得られませんでした。");
+            }
+        });
+
+        window.onload = () => {
+            updateUI();
+        };
+    </script>
+</body>
+</html>
