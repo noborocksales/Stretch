@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOBOROCK 渋谷店 クライミングシューズ診断</title>
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; padding: 15px; max-width: 600px; margin: 0 auto; }
+    
+    header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+    h1 { font-size: 1.35rem; color: var(--primary); font-weight: 800; }
+    .subtitle { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .step-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .step-badge { background: var(--primary); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; }
+
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+    select, input[type="number"], input[type="text"], input[type="password"], textarea {
+      width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); font-size: 1rem; outline: none;
+    }
+    select:focus, input:focus, textarea:focus { border-color: var(--primary); }
+    
+    .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 8px; }
+    .option-btn {
+      background: #0f172a; border: 1px solid var(--border); color: var(--text-main); padding: 10px 4px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.82rem; transition: all 0.2s;
+      background: #0f172a; border: 1px solid var(--border); color: var(--text-main); padding: 10px 4px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.82rem; transition: all 0.2s;
+    }
+    .option-btn.selected { background: var(--primary); border-color: var(--primary); font-weight: bold; }
+
+    .btn-submit {
+      width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px;
+    }
+    .btn-submit:hover { background: var(--primary-hover); }
+
+    .size-box { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; }
+    .size-title { font-size: 0.85rem; color: var(--accent); font-weight: bold; }
+    .size-val { font-size: 0.95rem; font-weight: bold; color: var(--text-main); margin-top: 6px; line-height: 1.5; }
+
+    .shoe-card { background: #0f172a; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 20px; }
+    .shoe-img-wrapper { width: 100%; height: 200px; background: #1e293b; overflow: hidden; }
+    .shoe-img { width: 100%; height: 100%; object-fit: cover; }
+    .shoe-info { padding: 16px; }
+    .shoe-brand { font-size: 0.75rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase; }
+    .shoe-name { font-size: 1.1rem; font-weight: bold; margin: 2px 0 6px 0; color: var(--text-main); }
+    .rec-size { font-size: 0.95rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; }
+    .shoe-desc { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
+    
+    .btn-article {
+      display: block; width: 100%; text-align: center; background: var(--primary); color: white; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: background 0.2s;
+    }
+    .btn-article:hover { background: var(--primary-hover); }
+
+    /* Star Rating */
+    .star-rating { display: flex; gap: 8px; justify-content: center; margin: 12px 0; font-size: 1.8rem; cursor: pointer; color: var(--border); }
+    .star-rating .star.active { color: #f59e0b; }
+
+    /* Admin View */
+    .admin-toggle { text-align: center; margin-top: 30px; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; text-decoration: underline; padding: 10px; }
+    .log-item { background: #0f172a; border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); font-size: 0.82rem; }
+    .log-date { color: var(--text-sub); font-size: 0.72rem; margin-bottom: 4px; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>NOBOROCK 渋谷店</h1>
+  <div class="subtitle">クライミングシューズ高精度診断ツール</div>
+</header>
+
+<div id="app">
+  <!-- 診断フォーム -->
+  <div id="view-form" class="card">
+    <div class="step-title"><span class="step-badge">STEP 1</span> 基本情報</div>
+    
+    <div class="form-group">
+      <label>1. 普段のスニーカーのサイズ (cm)</label>
+      <input type="number" id="input-sneaker" step="0.5" value="26.0">
+    </div>
+
+    <div class="form-group">
+      <label>2. クライミング歴・保有靴数</label>
+      <select id="input-level">
+        <option value="1">1足目（ビギナー向け）</option>
+        <option value="2" selected>2足目（ステップアップ）</option>
+        <option value="3">3足目以上（中上級・本気靴）</option>
+      </select>
+    </div>
+
+    <div class="step-title" style="margin-top:25px;"><span class="step-badge">STEP 2</span> 足型と好みの属性</div>
+
+    <div class="form-group">
+      <label>3. 幅の広さ</label>
+      <div class="btn-group" id="group-width">
+        <div class="option-btn" data-value="narrow">細め</div>
+        <div class="option-btn" data-value="normal">普通</div>
+        <div class="option-btn" data-value="wide">広め</div>
+        <div class="option-btn selected" data-value="none">選択しない</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>4. 甲の高さ</label>
+      <div class="btn-group" id="group-instep">
+        <div class="option-btn" data-value="low">低め</div>
+        <div class="option-btn" data-value="normal">普通</div>
+        <div class="option-btn" data-value="high">高め</div>
+        <div class="option-btn selected" data-value="none">選択しない</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>5. つま先の形状</label>
+      <div class="btn-group" id="group-toe">
+        <div class="option-btn" data-value="egyptian">親指が長い (エジプト)</div>
+        <div class="option-btn" data-value="roman">人差し指が長い (ギリシャ)</div>
+        <div class="option-btn" data-value="greek">指が揃っている (スクエア)</div>
+        <div class="option-btn selected" data-value="none">選択しない</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>6. 求めるソール特性</label>
+      <div class="btn-group" id="group-perf">
+        <div class="option-btn" data-value="soft">ソフト（足裏感覚）</div>
+        <div class="option-btn" data-value="allround">オールラウンド</div>
+        <div class="option-btn" data-value="hard">ハード（エッジング）</div>
+        <div class="option-btn selected" data-value="none">選択しない</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="runDiagnosis()">診断結果を見る（上位5足）</button>
+  </div>
+
+  <!-- 診断結果画面 -->
+  <div id="view-result" class="hidden">
+    <div class="size-box">
+      <div class="size-title">ブランド別 標準基準サイズ目安</div>
+      <div class="size-val" id="standard-size-display">--</div>
+    </div>
+
+    <h2 style="font-size: 1.05rem; margin-bottom: 12px; color: var(--text-main);">あなたにおすすめのシューズ Top 5</h2>
+    <div id="recommendations-container"></div>
+
+    <!-- 診断後の評価アンケート -->
+    <div class="card" style="margin-top: 25px;">
+      <div class="step-title">診断結果の満足度評価</div>
+      <p style="font-size: 0.85rem; color: var(--text-sub);">今回の提案結果についての評価をお聞かせください。</p>
+      
+      <div class="star-rating" id="rating-stars">
+        <span class="star" data-star="1">★</span>
+        <span class="star" data-star="2">★</span>
+        <span class="star" data-star="3">★</span>
+        <span class="star" data-star="4">★</span>
+        <span class="star" data-star="5">★</span>
+      </div>
+
+      <div class="form-group">
+        <textarea id="rating-comment" rows="3" placeholder="ご意見・フィードバック（任意）"></textarea>
+      </div>
+      
+      <button class="btn-submit" onclick="submitRating()">評価を送信する</button>
+    </div>
+
+    <button class="btn-submit" style="background:#334155; margin-bottom:20px;" onclick="resetForm()">もう一度診断する</button>
+  </div>
+
+  <!-- 管理者画面 -->
+  <div id="view-admin" class="card hidden">
+    <div class="step-title">管理者ダッシュボード</div>
+    <div id="admin-login-box">
+      <div class="form-group">
+        <label>パスワードを入力</label>
+        <input type="password" id="admin-pass-input" placeholder="パスワードを入力してください">
+      </div>
+      <button class="btn-submit" onclick="loginAdmin()">ログイン</button>
+    </div>
+    <div id="admin-content-box" class="hidden">
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">診断ログおよび評価フィードバック一覧</p>
+      <div id="admin-logs-container"></div>
+      <button class="btn-submit" style="background:#dc2626; margin-top:10px;" onclick="clearLogs()">ログをクリア</button>
+      <button class="btn-submit" style="background:#334155; margin-top:10px;" onclick="closeAdmin()">閉じる</button>
+    </div>
+  </div>
+
+  <div class="admin-toggle" onclick="toggleAdminView()">スタッフ専用管理画面</div>
+</div>
+
+<script>
+const ADMIN_PASSCODE = "Shibuya1010";
+const LOCAL_LOGS_KEY = "noborock_shibuya_logs_v6";
+let currentLogId = null;
+let currentRating = 0;
+
+// スプレッドシート完全準拠データベース（15モデル）
+const SHOE_DATABASE = [
+  {
+    id: 1, brand: "UNPARALLEL", name: "アンパラレル「エンゲージVCS」", categoryLevel: 1, sizeUnit: "US", sizeOffset: 0.5,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/323951753/rectangle_large_type_2_accf513a6becf4af35e8ac27eceaad04.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/naf294e7feecb", description: "長年「初めての1足目」として絶大な人気を誇ってきた名作",
+    score_level: 5, score_width_narrow: 4, score_width_normal: 3, score_width_wide: 2, score_instep_low: 1, score_instep_normal: 3, score_instep_high: 5, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 4, score_heel_narrow: 3, score_heel_normal: 5, score_heel_large: 4, score_perf_soft: 3, score_perf_allround: 4, score_perf_hard: 5
+  },
+  {
+    id: 2, brand: "SCARPA", name: "スカルパ「ベローチェ」", categoryLevel: 2, sizeUnit: "EU", sizeOffset: -1.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286020134/rectangle_large_type_2_e94a922ee07561d132e79da7bee586cd.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/nc17c0dcf3f68", description: "圧倒的な「ソフトさ（柔らかさ）」と「優れた足裏感覚」",
+    score_level: 5, score_width_narrow: 1, score_width_normal: 3, score_width_wide: 5, score_instep_low: 1, score_instep_normal: 3, score_instep_high: 5, score_toe_egyptian: 3, score_toe_roman: 3, score_toe_greek: 5, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 5, score_perf_soft: 5, score_perf_allround: 3, score_perf_hard: 1
+  },
+  {
+    id: 3, brand: "BUTORA", name: "ブトラ「コメット」", categoryLevel: 1, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/285970207/rectangle_large_type_2_2ddaaedb250fac0c0b2dbbcca27f3bad.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/ncd0bfe2c836d", description: "NOBOROCK渋谷店で、「初心者の初めての1足目」として最も売れているシューズ",
+    score_level: 5, score_width_narrow: 5, score_width_normal: 4, score_width_wide: 3, score_instep_low: 5, score_instep_normal: 4, score_instep_high: 3, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 3, score_heel_narrow: 4, score_heel_normal: 5, score_heel_large: 4, score_perf_soft: 4, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 4, brand: "BOREAL", name: "ボリエール「ジョーカー」", categoryLevel: 1, sizeUnit: "UK", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286035540/rectangle_large_type_2_5533a648c33b3e60a95744d1bd6cdc53.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n4d5d8ccbe86c", description: "とにかく足入れが優しく、小さな粒に楽に乗れるシューズ",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 5, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 3, score_heel_narrow: 2, score_heel_normal: 3, score_heel_large: 4, score_perf_soft: 3, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 5, brand: "SCARPA", name: "スカルパ「オリジンVS」", categoryLevel: 1, sizeUnit: "EU", sizeOffset: 0.5,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/323952579/rectangle_large_type_2_a800690690fdbe6dcbcbf2f9e6008961.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n5d8663ec9bd3", description: "履き心地が柔らかくて、現代のジム課題でとにかく滑らないシューズ",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 5, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 5, score_toe_roman: 3, score_toe_greek: 4, score_heel_narrow: 2, score_heel_normal: 3, score_heel_large: 4, score_perf_soft: 5, score_perf_allround: 4, score_perf_hard: 3
+  },
+  {
+    id: 6, brand: "UNPARALLEL", name: "アンパラレル「アップヴァートゥー」", categoryLevel: 1, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286136728/rectangle_large_type_2_ad162656a4ea50f345a6caad289be75e.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n5d8663ec9bd3", description: "買ったときの快適なサイズ感がずっと長持ちする、オールラウンドシューズ",
+    score_level: 5, score_width_narrow: 4, score_width_normal: 3, score_width_wide: 2, score_instep_low: 1, score_instep_normal: 3, score_instep_high: 5, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 4, score_heel_narrow: 3, score_heel_normal: 5, score_heel_large: 4, score_perf_soft: 3, score_perf_allround: 4, score_perf_hard: 5
+  },
+  {
+    id: 7, brand: "UNPARALLEL", name: "アンパラレル「アップフロート」", categoryLevel: 2, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286349996/rectangle_large_type_2_7bbdcb068d4b3e933736806448250503.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n8279070f1325", description: "快適な履き心地で、高難度なダイナミックムーブまでこなせる万能なソフトシューズ",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 5, score_instep_low: 5, score_instep_normal: 4, score_instep_high: 3, score_toe_egyptian: 4, score_toe_roman: 3, score_toe_greek: 5, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 5, score_perf_soft: 5, score_perf_allround: 3, score_perf_hard: 1
+  },
+  {
+    id: 8, brand: "LA SPORTIVA", name: "スポルティバ「スクワマライト」", categoryLevel: 2, sizeUnit: "EU", sizeOffset: -1.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/323953696/rectangle_large_type_2_0f4e10ade58019bb65c12df674dd6279.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n7ad4b04e19b5", description: "名作スクワマの戦闘力をそのままに、痛さとクセを限界まで無くした優等生シューズ",
+    score_level: 5, score_width_narrow: 4, score_width_normal: 5, score_width_wide: 3, score_instep_low: 5, score_instep_normal: 4, score_instep_high: 3, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 3, score_heel_narrow: 5, score_heel_normal: 4, score_heel_large: 3, score_perf_soft: 3, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 9, brand: "SCARPA", name: "スカルパ「インスティンクトVSR」", categoryLevel: 3, sizeUnit: "EU", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286135886/rectangle_large_type_2_2c0f63b37ce8098bfd14177ea514b33c.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n1b25071acd5c", description: "どんな壁、どんなホールドが出てきても、これ1足で完璧に戦える究極の優等生シューズ",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 5, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 4, score_toe_roman: 5, score_toe_greek: 3, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 5, score_perf_soft: 3, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 10, brand: "UNPARALLEL", name: "アンパラレル「TNフィ二ティ」", categoryLevel: 3, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/292776345/rectangle_large_type_2_d0b8df6809d9aca8250a2c238c641210.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/nf3e55d3304ce", description: "最高峰の剛性とエッジング性能を持ちながら、なぜか面でも絶対に滑らない未来のシューズ",
+    score_level: 5, score_width_narrow: 4, score_width_normal: 5, score_width_wide: 3, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 3, score_heel_narrow: 4, score_heel_normal: 5, score_heel_large: 4, score_perf_soft: 3, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 11, brand: "TENAYA", name: "テナヤ「オアシ」", categoryLevel: 2, sizeUnit: "UK", sizeOffset: -1.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/290373364/rectangle_large_type_2_3c8e2c1666bec97733be53a998a24480.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/ne1d150461db1", description: "繊細な足裏感覚を持ちながら、点（粒）にも面（ボテ）にも対応する万能シューズ",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 5, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 4, score_toe_roman: 5, score_toe_greek: 3, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 5, score_perf_soft: 4, score_perf_allround: 5, score_perf_hard: 3
+  },
+  {
+    id: 12, brand: "BUTORA", name: "ブトラ「アイベックス」", categoryLevel: 3, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/285970207/rectangle_large_type_2_2ddaaedb250fac0c0b2dbbcca27f3bad.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/ncd0bfe2c836d", description: "優れたフィット感と高い耐久性を兼ね備えた中上級者モデル",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 4, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 4, score_toe_egyptian: 4, score_toe_roman: 5, score_toe_greek: 3, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 4, score_perf_soft: 3, score_perf_allround: 5, score_perf_hard: 4
+  },
+  {
+    id: 13, brand: "LA SPORTIVA", name: "スポルティバ「スクワマ」", categoryLevel: 3, sizeUnit: "EU", sizeOffset: -0.5,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/309314278/rectangle_large_type_2_0e32a7ebb9dc270b4f556807fd6001b4.jpeg?width=4000&height=4000&fit=bounds&format=jpg&quality=90",
+    noteUrl: "https://note.com/clshoefitter/n/n138cde104eb3", description: "優れた足裏感覚と卓越したヒールフック性能を誇るハイエンドモデル",
+    score_level: 5, score_width_narrow: 2, score_width_normal: 4, score_width_wide: 5, score_instep_low: 3, score_instep_normal: 4, score_instep_high: 4, score_toe_egyptian: 5, score_toe_roman: 4, score_toe_greek: 2, score_heel_narrow: 2, score_heel_normal: 4, score_heel_large: 5, score_perf_soft: 5, score_perf_allround: 4, score_perf_hard: 2
+  },
+  {
+    id: 14, brand: "MADROCK", name: "マッドロック「D2.ONE」", categoryLevel: 3, sizeUnit: "US", sizeOffset: 0.0,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/286135886/rectangle_large_type_2_2c0f63b37ce8098bfd14177ea514b33c.jpeg?width=1240",
+    noteUrl: "https://note.com/clshoefitter/n/n1b25071acd5c", description: "強いダウントゥ形状でジム課題の立体的なフットホールドに対応",
+    score_level: 5, score_width_narrow: 3, score_width_normal: 4, score_width_wide: 4, score_instep_low: 2, score_instep_normal: 4, score_instep_high: 5, score_toe_egyptian: 4, score_toe_roman: 4, score_toe_greek: 3, score_heel_narrow: 3, score_heel_normal: 4, score_heel_large: 4, score_perf_soft: 4, score_perf_allround: 4, score_perf_hard: 3
+  },
+  {
+    id: 15, brand: "SCARPA", name: "スカルパ「ドラゴLV」", categoryLevel: 3, sizeUnit: "EU", sizeOffset: -0.5,
+    imageUrl: "https://assets.st-note.com/production/uploads/images/309314278/rectangle_large_type_2_0e32a7ebb9dc270b4f556807fd6001b4.jpeg?width=4000&height=4000&fit=bounds&format=jpg&quality=90",
+    noteUrl: "https://note.com/clshoefitter/n/n138cde104eb3", description: "圧倒的なトーフック・ヒールフック性能を持つスカルパ最高峰モデル",
+    score_level: 5, score_width_narrow: 5, score_width_normal: 3, score_width_wide: 1, score_instep_low: 5, score_instep_normal: 3, score_instep_high: 1, score_toe_egyptian: 4, score_toe_roman: 5, score_toe_greek: 2, score_heel_narrow: 5, score_heel_normal: 3, score_heel_large: 1, score_perf_soft: 5, score_perf_allround: 3, score_perf_hard: 1
+  }
+];
+
+// UI選択状態切り替え
+document.querySelectorAll('.btn-group').forEach(group => {
+  group.addEventListener('click', (e) => {
+    if (e.target.classList.contains('option-btn')) {
+      group.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      e.target.classList.add('selected');
+    }
+  });
+});
+
+function getSelectedValue(groupId) {
+  const selected = document.querySelector(`#${groupId} .option-btn.selected`);
+  return selected ? selected.getAttribute('data-value') : 'none';
+}
+
+function getSelectedText(groupId) {
+  const selected = document.querySelector(`#${groupId} .option-btn.selected`);
+  return selected ? selected.innerText : '選択なし';
+}
+
+// 標準サイズレンジ算出
+function calculateStandardSizes(sneakerSize) {
+  const d = sneakerSize - 26.0;
+  return `スポルティバ/スカルパ: EU ${(39.0+d).toFixed(1)}〜${(40.0+d).toFixed(1)} | アンパラレル/ブトラ/マッドロック: US ${(7.5+d).toFixed(1)}〜${(8.5+d).toFixed(1)} | ボリエール/テナヤ: UK ${(6.5+d).toFixed(1)}〜${(7.5+d).toFixed(1)}`;
+}
+
+// ブランド別表記＆固有オフセット算出
+function getRecommendedSizeText(shoe, sneakerSize) {
+  const d = sneakerSize - 26.0;
+  const offset = shoe.sizeOffset || 0.0;
+  
+  if (shoe.sizeUnit === 'EU') {
+    const base = 39.5 + d + offset;
+    return `EU ${(base - 0.5).toFixed(1)} 〜 ${(base + 0.5).toFixed(1)}`;
+  } else if (shoe.sizeUnit === 'US') {
+    const base = 8.0 + d + offset;
+    return `US ${(base - 0.5).toFixed(1)} 〜 ${(base + 0.5).toFixed(1)}`;
+  } else { // UK
+    const base = 7.0 + d + offset;
+    return `UK ${(base - 0.5).toFixed(1)} 〜 ${(base + 0.5).toFixed(1)}`;
+  }
+}
+
+// 相性スコア計算アルゴリズム（レベル評価を3倍に重み付け）
+function calculateShoeScore(shoe, u) {
+  let score = 0;
+  
+  if (u.level === shoe.categoryLevel) {
+    score += (shoe.score_level * 15) * 3;
+  } else {
+    score -= 150;
+  }
+
+  score += (u.width === 'none') ? 3 : (shoe[`score_width_${u.width}`] || 3);
+  score += (u.instep === 'none') ? 3 : (shoe[`score_instep_${u.instep}`] || 3);
+  score += (u.toe === 'none') ? 3 : (shoe[`score_toe_${u.toe}`] || 3);
+  score += (u.perf === 'none') ? 3 : (shoe[`score_perf_${u.perf}`] || 3);
+
+  return score;
+}
+
+function runDiagnosis() {
+  const sneakerSize = parseFloat(document.getElementById('input-sneaker').value) || 26.0;
+  const levelSelect = document.getElementById('input-level');
+  
+  const userAnswers = {
+    sneaker: sneakerSize,
+    levelVal: parseInt(levelSelect.value, 10),
+    levelText: levelSelect.options[levelSelect.selectedIndex].text,
+    widthText: getSelectedText('group-width'),
+    instepText: getSelectedText('group-instep'),
+    toeText: getSelectedText('group-toe'),
+    perfText: getSelectedText('group-perf'),
+    width: getSelectedValue('group-width'),
+    instep: getSelectedValue('group-instep'),
+    toe: getSelectedValue('group-toe'),
+    perf: getSelectedValue('group-perf')
+  };
+
+  document.getElementById('standard-size-display').innerText = calculateStandardSizes(sneakerSize);
+
+  const scoredShoes = SHOE_DATABASE.map(shoe => ({
+    ...shoe,
+    calculatedScore: calculateShoeScore(shoe, userAnswers),
+    recommendedSize: getRecommendedSizeText(shoe, sneakerSize)
+  })).sort((a, b) => b.calculatedScore - a.calculatedScore).slice(0, 5);
+
+  const container = document.getElementById('recommendations-container');
+  container.innerHTML = '';
+
+  scoredShoes.forEach((shoe, idx) => {
+    const card = document.createElement('div');
+    card.className = 'shoe-card';
+    card.innerHTML = `
+      <div class="shoe-img-wrapper">
+        <img class="shoe-img" src="${shoe.imageUrl}" alt="${shoe.name}" onerror="this.src='https://via.placeholder.com/400x300?text=NOBOROCK+Image'">
+      </div>
+      <div class="shoe-info">
+        <div class="shoe-brand">第 ${idx + 1} 位 : ${shoe.brand}</div>
+        <div class="shoe-name">${shoe.name}</div>
+        <div class="rec-size">推奨サイズ (${shoe.sizeUnit}): ${shoe.recommendedSize}</div>
+        <div class="shoe-desc">${shoe.description}</div>
+        <a href="${shoe.noteUrl}" target="_blank" rel="noopener noreferrer" class="btn-article">NAKAYAの解説記事を読む</a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  currentLogId = saveLog(userAnswers, scoredShoes[0]);
+
+  document.getElementById('view-form').classList.add('hidden');
+  document.getElementById('view-result').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 星評価設定
+document.querySelectorAll('#rating-stars .star').forEach(starEl => {
+  starEl.addEventListener('click', () => {
+    currentRating = parseInt(starEl.getAttribute('data-star'), 10);
+    document.querySelectorAll('#rating-stars .star').forEach(s => {
+      s.classList.toggle('active', parseInt(s.getAttribute('data-star'), 10) <= currentRating);
+    });
+  });
+});
+
+function submitRating() {
+  if (!currentRating) {
+    alert("星評価を選択してください。");
+    return;
+  }
+  const comment = document.getElementById('rating-comment').value;
+  const logs = JSON.parse(localStorage.getItem(LOCAL_LOGS_KEY) || "[]");
+  const logIndex = logs.findIndex(l => l.id === currentLogId);
+  if (logIndex !== -1) {
+    logs[logIndex].rating = currentRating;
+    logs[logIndex].comment = comment;
+    localStorage.setItem(LOCAL_LOGS_KEY, JSON.stringify(logs));
+  }
+  alert("評価を送信しました。ご協力ありがとうございます！");
+}
+
+function saveLog(answers, topPick) {
+  const logId = Date.now();
+  try {
+    const logs = JSON.parse(localStorage.getItem(LOCAL_LOGS_KEY) || "[]");
+    logs.unshift({
+      id: logId,
+      timestamp: new Date().toISOString(),
+      sneaker: answers.sneaker,
+      levelText: answers.levelText,
+      widthText: answers.widthText,
+      instepText: answers.instepText,
+      toeText: answers.toeText,
+      perfText: answers.perfText,
+      topPick: topPick ? topPick.name : "N/A",
+      rating: null,
+      comment: ""
+    });
+    localStorage.setItem(LOCAL_LOGS_KEY, JSON.stringify(logs));
+  } catch (e) {
+    console.error(e);
+  }
+  return logId;
+}
+
+function resetForm() {
+  currentRating = 0;
+  document.querySelectorAll('#rating-stars .star').forEach(s => s.classList.remove('active'));
+  document.getElementById('rating-comment').value = '';
+  document.getElementById('view-result').classList.add('hidden');
+  document.getElementById('view-form').classList
